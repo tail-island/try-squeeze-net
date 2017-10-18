@@ -1,9 +1,16 @@
-import numpy as np
+import numpy   as np
 import os
+import os.path as path
+import shutil
 import pickle
 
-from keras.utils import to_categorical
-from operator    import attrgetter
+from keras.utils            import to_categorical
+from keras.utils.data_utils import get_file
+from operator               import attrgetter
+
+
+def download_data():
+    shutil.copytree(get_file('cifar-10-batches-py', origin='http://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz', untar=True), './data')
 
 
 def load_data(data_path='./data'):
@@ -16,6 +23,9 @@ def load_data(data_path='./data'):
 
     def load_batches(paths):
         return tuple(map(np.concatenate, zip(*map(load_batch, paths))))
+
+    if not path.exists('./data'):
+        download_data()
 
     return (load_batches(sorted(map(attrgetter('path'), filter(lambda directory_entry: directory_entry.name.startswith('data_batch_'), os.scandir(data_path))))),
             load_batch('{0}/test_batch'.format(data_path)))

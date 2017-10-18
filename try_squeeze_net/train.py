@@ -1,15 +1,12 @@
-import numpy             as np
-import matplotlib.pyplot as plot
+import numpy as np
 import pickle
 
-from funcy                     import concat, identity, juxt, partial, rcompose, repeat, take
-from keras.callbacks           import LearningRateScheduler
+from funcy                     import identity, juxt, rcompose
+from keras.callbacks           import ReduceLROnPlateau
 from keras.layers              import Activation, Add, BatchNormalization, Concatenate, Conv2D, Dropout, GlobalAveragePooling2D, Input, MaxPooling2D
 from keras.models              import Model, save_model
 from keras.optimizers          import SGD
 from keras.preprocessing.image import ImageDataGenerator
-from keras.regularizers        import l2
-from operator                  import getitem
 from try_squeeze_net.data_set  import load_data
 
 
@@ -19,7 +16,7 @@ def ljuxt(*fs):  # Kerasはジェネレーターを引数に取るのを嫌が�
 
 def create_model(x, y):
     def conv_2d(filters, kernel_size, strides=1):
-        return Conv2D(filters, kernel_size, strides=strides, padding='same', kernel_initializer='he_normal', kernel_regularizer=l2(0.0001))
+        return Conv2D(filters, kernel_size, strides=strides, padding='same', kernel_initializer='he_normal')
 
     def max_pooling_2d():
         return MaxPooling2D(pool_size=3, strides=2, padding='same')
@@ -63,19 +60,26 @@ def main():
 
     model = create_model(x_train, y_train)
     model.compile(loss='categorical_crossentropy',
-                  optimizer=SGD(decay=0.0001, momentum=0.9, nesterov=True),
+                  optimizer=SGD(lr=0.1, decay=0.0001, momentum=0.9, nesterov=True),
                   metrics=['accuracy'])
 
     model.summary()
 
+    train_data      = ImageDataGenerator(featurewise_center=True, featurewise_std_normalization=True, width_shift_range=0.125, height_shift_range=0.125, horizontal_flip=True)
+    validation_data = ImageDataGenerator(featurewise_center=True, featurewise_std_normalization=True)
+
+    for data in (train_data, validation_data):
+        data.fit(x_train)  # 実用を考えると、x_validationでのfeaturewiseのfitは無理だと思う……。
+
     batch_size = 100
     epochs     = 200
 
-    results = model.fit_generator(ImageDataGenerator(width_shift_range=0.1, height_shift_range=0.1, horizontal_flip=True).flow(x_train, y_train, batch_size=batch_size),
+    results = model.fit_generator(train_data.flow(x_train, y_train, batch_size=batch_size),
                                   steps_per_epoch=x_train.shape[0] // batch_size,
                                   epochs=epochs,
-                                  callbacks=[LearningRateScheduler(partial(getitem, tuple(take(epochs, concat(repeat(0.1, 100), repeat(0.01, 50), repeat(0.001))))))],
-                                  validation_data=(x_validation, y_validation),
+                                  callbacks=[ReduceLROnPlateau(patience=50, verbose=1)],
+                                  validation_data=validation_data.flow(x_validation, y_validation, batch_size=batch_size),
+                                  validation_steps=x_validation.shape[0] // batch_size,
                                   workers=4)
 
     with open('./history.pickle', 'wb') as f:
