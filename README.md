@@ -24,9 +24,7 @@ $ python3 -m try_squeeze_net.check
 
 ![loss](./results/loss.png)
 
-![learning rate](./results/learning-rate.png)
-
-私が試した結果だと、cifar10の精度は93.05%になりました。
+私が試した結果だと、cifar10の精度はxx.xx%になりました。
 
 # Notes
 
