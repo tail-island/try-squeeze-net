@@ -22,13 +22,17 @@ def create_model(x, y):
     def max_pooling_2d():
         return MaxPooling2D(pool_size=3, strides=2, padding='same')
 
+    def bn_relu():
+        return rcompose(BatchNormalization(), Activation('relu'))
+
     def bn_relu_conv(filters, kernel_size, strides=1):
-        return rcompose(BatchNormalization(), Activation('relu'), conv_2d(filters, kernel_size, strides))
+        return rcompose(bn_relu(), conv_2d(filters, kernel_size, strides))
 
     def fire_module(filters_squeeze, filters_expand):
         return rcompose(bn_relu_conv(filters_squeeze, 1),
-                        ljuxt(bn_relu_conv(filters_expand // 2, 1),
-                              bn_relu_conv(filters_expand // 2, 3)),
+                        bn_relu(),
+                        ljuxt(conv_2d(filters_expand // 2, 1),
+                              conv_2d(filters_expand // 2, 3)),
                         Concatenate())
 
     def fire_module_with_shortcut(filters_squeeze, filters_expand):
