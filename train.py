@@ -35,7 +35,7 @@ def computational_graph(class_size):
         return Activation('relu')
 
     def conv(filters, kernel_size):
-        return Conv2D(filters, kernel_size, padding='same', kernel_initializer='he_normal', kernel_regularizer=l2(0.0001))
+        return Conv2D(filters, kernel_size, padding='same', kernel_initializer='he_normal', kernel_regularizer=l2(0.0001))  # ReLUするならウェイトをHe初期化するのが基本らしい。あと、Kerasにはweight decayがなかったのでkernel_regularizerで代替したのたけど、これで正しい？
 
     def concatenate():
         return Concatenate()
@@ -86,7 +86,6 @@ def computational_graph(class_size):
                     fire_module_with_shortcut(64, 512),
                     batch_normalization(),
                     relu(),
-                    # dropout(),
                     global_average_pooling(),
                     dense(class_size, 'softmax'))
 
@@ -98,7 +97,7 @@ def main():
     model.compile(loss='categorical_crossentropy', optimizer=SGD(momentum=0.9), metrics=['accuracy'])
 
     model.summary()
-    plot_model(model, to_file='./results/model.png')
+    # plot_model(model, to_file='./results/model.png')
 
     train_data      = ImageDataGenerator(featurewise_center=True, featurewise_std_normalization=True, width_shift_range=0.125, height_shift_range=0.125, horizontal_flip=True)
     validation_data = ImageDataGenerator(featurewise_center=True, featurewise_std_normalization=True)
