@@ -59,13 +59,12 @@ def computational_graph(class_size):
 
     def fire_module(filters_squeeze, filters_expand):
         return rcompose(batch_normalization(),
+                        relu(),
                         conv(filters_squeeze, 1),
                         batch_normalization(),
                         relu(),
-                        ljuxt(rcompose(conv(filters_expand // 2, 1),
-                                       batch_normalization()),
-                              rcompose(conv(filters_expand // 2, 3),
-                                       batch_normalization())),
+                        ljuxt(conv(filters_expand // 2, 1),
+                              conv(filters_expand // 2, 3)),
                         concatenate())
 
     def fire_module_with_shortcut(filters_squeeze, filters_expand):
@@ -85,9 +84,9 @@ def computational_graph(class_size):
                     fire_module(64, 512),
                     max_pooling(),
                     fire_module_with_shortcut(64, 512),
-                    dropout(),
                     batch_normalization(),
                     relu(),
+                    # dropout(),
                     global_average_pooling(),
                     dense(class_size, 'softmax'))
 
