@@ -24,9 +24,7 @@ $ python3 check.py
 
 ![accuracy](./results/accuracy.png)
 
-私が試した結果だと、cifar10の精度は91.40%になりました。
-
-※weight decayに相当すると思われるkernel_regularizerを追加して再計測中です。
+私が試した結果だと、CIFAR-10の精度は93.77%になりました。
 
 # Notes
 
