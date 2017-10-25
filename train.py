@@ -35,7 +35,7 @@ def computational_graph(class_size):
         return Activation('relu')
 
     def conv(filters, kernel_size):
-        return Conv2D(filters, kernel_size, padding='same', kernel_initializer='he_normal', kernel_regularizer=l2(0.0005))
+        return Conv2D(filters, kernel_size, padding='same', kernel_initializer='he_normal', kernel_regularizer=l2(0.0001))
 
     def concatenate():
         return Concatenate()
@@ -53,7 +53,7 @@ def computational_graph(class_size):
         return GlobalAveragePooling2D()
 
     def dense(units, activation):
-        return Dense(units, activation=activation, kernel_regularizer=l2(0.0005))
+        return Dense(units, activation=activation, kernel_regularizer=l2(0.0001))
 
     # Define SqueezeNet
 
