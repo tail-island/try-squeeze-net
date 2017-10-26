@@ -55,7 +55,7 @@ def computational_graph(class_size):
     def dense(units, activation):
         return Dense(units, activation=activation, kernel_regularizer=l2(0.0001))
 
-    # Define SqueezeNet
+    # Define SqueezeNet.
 
     def fire_module(filters_squeeze, filters_expand):
         return rcompose(batch_normalization(),
